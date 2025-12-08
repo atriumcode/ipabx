@@ -184,10 +184,7 @@ apt-get install -y -qq \
     asterisk \
     asterisk-modules \
     asterisk-config \
-    asterisk-core-sounds-pt-br \
     asterisk-moh-opsound-wav \
-    asterisk-voicemail \
-    asterisk-ooh323 \
     sox \
     libsox-fmt-all
 
@@ -211,7 +208,7 @@ if ! command -v asterisk &> /dev/null; then
     ldconfig
     
     # Criar usuário asterisk
-    useradd -r -d /var/lib/asterisk -s /bin/bash asterisk
+    useradd -r -d /var/lib/asterisk -s /bin/bash asterisk 2>/dev/null || true
     chown -R asterisk:asterisk /etc/asterisk /var/lib/asterisk /var/spool/asterisk /var/log/asterisk /var/run/asterisk
 fi
 
