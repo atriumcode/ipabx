@@ -6,7 +6,11 @@ import type { UpdateTrunkDto } from "./dto/update-trunk.dto"
 
 @Injectable()
 export class TrunksService {
-  constructor(private readonly trunkRepository: Repository<Trunk>) {}
+  private readonly trunkRepository: Repository<Trunk>
+
+  constructor(trunkRepository: Repository<Trunk>) {
+    this.trunkRepository = trunkRepository
+  }
 
   async create(createTrunkDto: CreateTrunkDto, tenantId: number): Promise<Trunk> {
     const existing = await this.trunkRepository.findOne({

@@ -86,7 +86,8 @@ echo ""
 # Verificar arquivos frontend
 echo -e "${BLUE}[7/7] Verificando arquivos do frontend${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-FRONTEND_DIR="/opt/pbx-moderno/frontend/dist"
+INSTALL_DIR="/opt/ipabx"
+FRONTEND_DIR="$INSTALL_DIR/frontend/dist"
 if [ -d "$FRONTEND_DIR" ]; then
     echo -e "${GREEN}✓${NC} Diretório frontend existe: $FRONTEND_DIR"
     if [ -f "$FRONTEND_DIR/index.html" ]; then
@@ -96,7 +97,7 @@ if [ -d "$FRONTEND_DIR" ]; then
     fi
 else
     echo -e "${RED}✗${NC} Diretório frontend NÃO existe: $FRONTEND_DIR"
-    echo "  Execute: cd /opt/pbx-moderno/frontend && npm run build"
+    echo "  Execute: cd $INSTALL_DIR/frontend && npm run build"
 fi
 echo ""
 

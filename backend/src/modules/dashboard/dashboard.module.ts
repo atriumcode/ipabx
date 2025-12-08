@@ -1,14 +1,13 @@
 import { Module } from "@nestjs/common"
-import { TypeOrmModule } from "@nestjs/typeorm"
 import { DashboardService } from "./dashboard.service"
 import { DashboardController } from "./dashboard.controller"
-import { Extension } from "../extensions/entities/extension.entity"
-import { Trunk } from "../trunks/entities/trunk.entity"
-import { Queue } from "../queues/entities/queue.entity"
-import { Cdr } from "../cdr/entities/cdr.entity"
+import { ExtensionsModule } from "../extensions/extensions.module"
+import { TrunksModule } from "../trunks/trunks.module"
+import { QueuesModule } from "../queues/queues.module"
+import { CdrModule } from "../cdr/cdr.module"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Extension, Trunk, Queue, Cdr])],
+  imports: [ExtensionsModule, TrunksModule, QueuesModule, CdrModule],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

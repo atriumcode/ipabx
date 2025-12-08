@@ -6,11 +6,7 @@ import type { UpdateExtensionDto } from "./dto/update-extension.dto"
 
 @Injectable()
 export class ExtensionsService {
-  private readonly extensionRepository: Repository<Extension>
-
-  constructor(extensionRepository: Repository<Extension>) {
-    this.extensionRepository = extensionRepository
-  }
+  constructor(private readonly extensionRepository: Repository<Extension>) {}
 
   /**
    * Cria um novo ramal

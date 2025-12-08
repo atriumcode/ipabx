@@ -392,9 +392,12 @@ server {
     server_name _;
 
     # Frontend
+    root /opt/ipabx/frontend/dist;
+    index index.html;
+
+    # Frontend - SPA routing
     location / {
-        root /opt/pbx-moderno/frontend/dist;
-        try_files $uri $uri/ /index.html;
+        try_files $uri /index.html;
         expires 1d;
         add_header Cache-Control "public, immutable";
     }

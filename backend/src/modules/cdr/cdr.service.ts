@@ -4,11 +4,7 @@ import type { Cdr } from "./entities/cdr.entity"
 
 @Injectable()
 export class CdrService {
-  constructor(cdrRepository: Repository<Cdr>) {
-    this.cdrRepository = cdrRepository
-  }
-
-  private cdrRepository: Repository<Cdr>
+  constructor(private cdrRepository: Repository<Cdr>) {}
 
   async findAll(tenantId: number, filters?: any) {
     const query = this.cdrRepository
