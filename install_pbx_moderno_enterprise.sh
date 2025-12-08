@@ -286,11 +286,13 @@ SYSTEM_NAME=PBX Moderno Enterprise
 SYSTEM_VERSION=1.0.0
 EOF
 
-# Instalar dependências
-npm install --production --silent
+print_message "Instalando dependências do backend..."
+npm install --silent
 
-# Build
-npm run build
+print_message "Compilando backend..."
+npx nest build
+
+npm prune --production --silent
 
 print_message "Backend configurado!"
 
@@ -298,7 +300,10 @@ print_message "Backend configurado!"
 print_message "Configurando frontend..."
 cd "$INSTALL_DIR/frontend"
 
+print_message "Instalando dependências do frontend..."
 npm install --silent
+
+print_message "Compilando frontend..."
 npm run build
 
 print_message "Frontend configurado!"
