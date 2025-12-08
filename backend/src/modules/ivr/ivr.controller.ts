@@ -2,7 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@n
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import type { IvrService } from "./ivr.service"
 import type { Ivr } from "./entities/ivr.entity"
-import type { Request } from "express"
+
+interface RequestWithUser {
+  user: {
+    id: number
+    tenantId: number
+    email: string
+    perfil: string
+  }
+}
 
 @Controller("ivr")
 @UseGuards(JwtAuthGuard)
@@ -10,27 +18,27 @@ export class IvrController {
   constructor(private readonly ivrService: IvrService) {}
 
   @Get()
-  findAll(req: Request) {
+  findAll(req: RequestWithUser) {
     return this.ivrService.findAll(req.user.tenantId)
   }
 
   @Get(":id")
-  findOne(@Param('id') id: string, req: Request) {
+  findOne(@Param('id') id: string, req: RequestWithUser) {
     return this.ivrService.findOne(Number(id), req.user.tenantId)
   }
 
   @Post()
-  create(@Body() data: Partial<Ivr>, req: Request) {
+  create(@Body() data: Partial<Ivr>, req: RequestWithUser) {
     return this.ivrService.create({ ...data, tenantId: req.user.tenantId })
   }
 
   @Patch(":id")
-  update(@Param('id') id: string, @Body() data: Partial<Ivr>, req: Request) {
+  update(@Param('id') id: string, @Body() data: Partial<Ivr>, req: RequestWithUser) {
     return this.ivrService.update(Number(id), data)
   }
 
   @Delete(":id")
-  remove(@Param('id') id: string, req: Request) {
+  remove(@Param('id') id: string, req: RequestWithUser) {
     return this.ivrService.remove(Number(id))
   }
 }

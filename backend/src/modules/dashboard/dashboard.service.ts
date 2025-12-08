@@ -53,7 +53,7 @@ export class DashboardService {
   async getRecentCalls(tenantId: number, limit = 10) {
     return this.cdrRepository.find({
       where: { tenantId },
-      order: { calldate: "DESC" },
+      order: { dataHora: "DESC" },
       take: limit,
     })
   }

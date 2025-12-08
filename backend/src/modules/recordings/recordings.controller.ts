@@ -9,12 +9,12 @@ export class RecordingsController {
 
   @Get()
   findAll(@Query("tenantId") tenantId: string) {
-    return this.recordingsService.findAll(tenantId)
+    return this.recordingsService.findAll(Number(tenantId))
   }
 
   @Get(":id")
   findOne(@Param("id") id: string, @Query("tenantId") tenantId: string) {
-    return this.recordingsService.findOne(+id, tenantId)
+    return this.recordingsService.findOne(Number(id), Number(tenantId))
   }
 
   @Delete(":id")
