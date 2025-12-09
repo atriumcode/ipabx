@@ -1,16 +1,15 @@
 import { Module } from "@nestjs/common"
-import { ConfigModule, ConfigService } from "@nestjs/config"
+import { ConfigModule } from "@nestjs/config"
 import { AsteriskService } from "./asterisk.service"
 import { AsteriskRealtimeService } from "./asterisk-realtime.service"
 
 @Module({
   imports: [
-    ConfigModule, // usa ConfigModule já carregado no AppModule
+    ConfigModule, // Apenas importa, NÃO coloca ConfigService nos providers
   ],
   providers: [
     AsteriskService,
     AsteriskRealtimeService,
-    ConfigService, // garante injeção
   ],
   exports: [
     AsteriskService,
