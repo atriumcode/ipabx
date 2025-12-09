@@ -1,5 +1,5 @@
 import { Injectable, type OnModuleInit } from "@nestjs/common"
-import type { ConfigService } from "@nestjs/config"
+import { ConfigService } from "@nestjs/config"
 
 /**
  * Serviço de integração com Asterisk AMI/ARI
