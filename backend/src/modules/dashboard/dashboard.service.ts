@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common"
-import type { ExtensionsService } from "../extensions/extensions.service"
-import type { TrunksService } from "../trunks/trunks.service"
-import type { QueuesService } from "../queues/queues.service"
-import type { CdrService } from "../cdr/cdr.service"
+import { ExtensionsService } from "../extensions/extensions.service"
+import { TrunksService } from "../trunks/trunks.service"
+import { QueuesService } from "../queues/queues.service"
+import { CdrService } from "../cdr/cdr.service"
 
 @Injectable()
 export class DashboardService {
   constructor(
-    private extensionsService: ExtensionsService,
-    private trunksService: TrunksService,
-    private queuesService: QueuesService,
-    private cdrService: CdrService,
+    private readonly extensionsService: ExtensionsService,
+    private readonly trunksService: TrunksService,
+    private readonly queuesService: QueuesService,
+    private readonly cdrService: CdrService,
   ) {}
 
   /**

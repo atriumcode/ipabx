@@ -1,20 +1,19 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common"
-import type { JwtService } from "@nestjs/jwt"
-import type { Repository } from "typeorm"
+import { JwtService } from "@nestjs/jwt"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
 import * as bcrypt from "bcrypt"
 
-import type { SystemUser } from "../users/entities/system-user.entity"
+import { SystemUser } from "../users/entities/system-user.entity"
 import type { LoginDto } from "./dto/login.dto"
 
 @Injectable()
 export class AuthService {
-  private readonly userRepository: Repository<SystemUser>
-  private readonly jwtService: JwtService
-
-  constructor(userRepository: Repository<SystemUser>, jwtService: JwtService) {
-    this.userRepository = userRepository
-    this.jwtService = jwtService
-  }
+  constructor(
+    @InjectRepository(SystemUser)
+    private readonly userRepository: Repository<SystemUser>,
+    private readonly jwtService: JwtService,
+  ) {}
 
   /**
    * Valida as credenciais do usuário
@@ -83,7 +82,7 @@ export class AuthService {
         relations: ["tenant"],
       })
       return user
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException("Token inválido")
     }
   }

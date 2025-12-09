@@ -1,24 +1,24 @@
 import { Injectable } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { Recording } from "./entities/recording.entity"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { Recording } from "./entities/recording.entity"
 
 @Injectable()
 export class RecordingsService {
-  private recordingRepository: Repository<Recording>
-
-  constructor(recordingRepository: Repository<Recording>) {
-    this.recordingRepository = recordingRepository
-  }
+  constructor(
+    @InjectRepository(Recording)
+    private readonly recordingRepository: Repository<Recording>,
+  ) {}
 
   async findAll(tenantId: number) {
-    return await this.recordingRepository.find({
+    return this.recordingRepository.find({
       where: { tenantId },
       order: { dataCriacao: "DESC" },
     })
   }
 
   async findOne(id: number, tenantId: number) {
-    return await this.recordingRepository.findOne({
+    return this.recordingRepository.findOne({
       where: { id, tenantId },
     })
   }

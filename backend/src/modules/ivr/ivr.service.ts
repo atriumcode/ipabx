@@ -1,24 +1,27 @@
 import { Injectable } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { Ivr } from "./entities/ivr.entity"
-import type { IvrOption } from "./entities/ivr-option.entity"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { Ivr } from "./entities/ivr.entity"
+import { IvrOption } from "./entities/ivr-option.entity"
 
 @Injectable()
 export class IvrService {
   constructor(
-    private ivrRepository: Repository<Ivr>,
-    private ivrOptionRepository: Repository<IvrOption>,
+    @InjectRepository(Ivr)
+    private readonly ivrRepository: Repository<Ivr>,
+    @InjectRepository(IvrOption)
+    private readonly ivrOptionRepository: Repository<IvrOption>,
   ) {}
 
   async findAll(tenantId: number) {
-    return await this.ivrRepository.find({
+    return this.ivrRepository.find({
       where: { tenantId },
       relations: ["opcoes"],
     })
   }
 
   async findOne(id: number, tenantId: number) {
-    return await this.ivrRepository.findOne({
+    return this.ivrRepository.findOne({
       where: { id, tenantId },
       relations: ["opcoes"],
     })
@@ -26,12 +29,12 @@ export class IvrService {
 
   async create(data: Partial<Ivr>) {
     const ivr = this.ivrRepository.create(data)
-    return await this.ivrRepository.save(ivr)
+    return this.ivrRepository.save(ivr)
   }
 
   async update(id: number, data: Partial<Ivr>) {
     await this.ivrRepository.update(id, data)
-    return await this.ivrRepository.findOne({
+    return this.ivrRepository.findOne({
       where: { id },
       relations: ["opcoes"],
     })

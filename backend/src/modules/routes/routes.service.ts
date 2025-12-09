@@ -1,24 +1,27 @@
 import { Injectable } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { InboundRoute } from "./entities/inbound-route.entity"
-import type { OutboundRoute } from "./entities/outbound-route.entity"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { InboundRoute } from "./entities/inbound-route.entity"
+import { OutboundRoute } from "./entities/outbound-route.entity"
 
 @Injectable()
 export class RoutesService {
   constructor(
-    private inboundRouteRepository: Repository<InboundRoute>,
-    private outboundRouteRepository: Repository<OutboundRoute>,
+    @InjectRepository(InboundRoute)
+    private readonly inboundRouteRepository: Repository<InboundRoute>,
+    @InjectRepository(OutboundRoute)
+    private readonly outboundRouteRepository: Repository<OutboundRoute>,
   ) {}
 
   async findAllInbound(tenantId: number) {
-    return await this.inboundRouteRepository.find({
+    return this.inboundRouteRepository.find({
       where: { tenantId },
       order: { prioridade: "ASC" },
     })
   }
 
   async findAllOutbound(tenantId: number) {
-    return await this.outboundRouteRepository.find({
+    return this.outboundRouteRepository.find({
       where: { tenantId },
       order: { prioridade: "ASC" },
     })
@@ -26,22 +29,22 @@ export class RoutesService {
 
   async createInbound(data: Partial<InboundRoute>) {
     const route = this.inboundRouteRepository.create(data)
-    return await this.inboundRouteRepository.save(route)
+    return this.inboundRouteRepository.save(route)
   }
 
   async createOutbound(data: Partial<OutboundRoute>) {
     const route = this.outboundRouteRepository.create(data)
-    return await this.outboundRouteRepository.save(route)
+    return this.outboundRouteRepository.save(route)
   }
 
   async updateInbound(id: number, data: Partial<InboundRoute>) {
     await this.inboundRouteRepository.update(id, data)
-    return await this.inboundRouteRepository.findOne({ where: { id } })
+    return this.inboundRouteRepository.findOne({ where: { id } })
   }
 
   async updateOutbound(id: number, data: Partial<OutboundRoute>) {
     await this.outboundRouteRepository.update(id, data)
-    return await this.outboundRouteRepository.findOne({ where: { id } })
+    return this.outboundRouteRepository.findOne({ where: { id } })
   }
 
   async removeInbound(id: number) {

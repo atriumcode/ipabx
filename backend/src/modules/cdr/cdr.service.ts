@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { Cdr } from "./entities/cdr.entity"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { Cdr } from "./entities/cdr.entity"
 
 @Injectable()
 export class CdrService {
-  constructor(private cdrRepository: Repository<Cdr>) {}
+  constructor(
+    @InjectRepository(Cdr)
+    private readonly cdrRepository: Repository<Cdr>,
+  ) {}
 
   async findAll(tenantId: number, filters?: any) {
     const query = this.cdrRepository
@@ -20,11 +24,11 @@ export class CdrService {
       query.andWhere("cdr.dataHora <= :dataFim", { dataFim: filters.dataFim })
     }
 
-    return await query.take(filters?.limit || 100).getMany()
+    return query.take(filters?.limit || 100).getMany()
   }
 
   async findOne(id: number, tenantId: number) {
-    return await this.cdrRepository.findOne({
+    return this.cdrRepository.findOne({
       where: { id, tenantId },
     })
   }
