@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException, ConflictException } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { Extension } from "./entities/extension.entity"
-import type { CreateExtensionDto } from "./dto/create-extension.dto"
-import type { UpdateExtensionDto } from "./dto/update-extension.dto"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { Extension } from "./entities/extension.entity"
+import { CreateExtensionDto } from "./dto/create-extension.dto"
+import { UpdateExtensionDto } from "./dto/update-extension.dto"
 
 @Injectable()
 export class ExtensionsService {
-  constructor(private readonly extensionRepository: Repository<Extension>) {}
+  constructor(
+    @InjectRepository(Extension)
+    private readonly extensionRepository: Repository<Extension>,
+  ) {}
 
   /**
    * Cria um novo ramal
@@ -28,7 +32,7 @@ export class ExtensionsService {
 
     const saved = await this.extensionRepository.save(extension)
 
-    // TODO: Aqui deve criar os registros no Asterisk Realtime (ps_endpoints, ps_auths, ps_aors)
+    // Sincroniza com Asterisk
     await this.syncToAsterisk(saved)
 
     return saved
@@ -64,7 +68,9 @@ export class ExtensionsService {
    */
   async update(id: number, updateExtensionDto: UpdateExtensionDto, tenantId: number): Promise<Extension> {
     const extension = await this.findOne(id, tenantId)
+
     Object.assign(extension, updateExtensionDto)
+
     const updated = await this.extensionRepository.save(extension)
 
     // Sincroniza com Asterisk
@@ -79,7 +85,7 @@ export class ExtensionsService {
   async remove(id: number, tenantId: number): Promise<void> {
     const extension = await this.findOne(id, tenantId)
 
-    // TODO: Remover do Asterisk Realtime
+    // Remove do Asterisk Realtime
     await this.removeFromAsterisk(extension)
 
     await this.extensionRepository.remove(extension)
