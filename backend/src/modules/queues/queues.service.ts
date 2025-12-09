@@ -1,14 +1,18 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import type { Queue } from "./entities/queue.entity"
-import type { QueueMember } from "./entities/queue-member.entity"
-import type { CreateQueueDto } from "./dto/create-queue.dto"
-import type { UpdateQueueDto } from "./dto/update-queue.dto"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
+import { Queue } from "./entities/queue.entity"
+import { QueueMember } from "./entities/queue-member.entity"
+import { CreateQueueDto } from "./dto/create-queue.dto"
+import { UpdateQueueDto } from "./dto/update-queue.dto"
 
 @Injectable()
 export class QueuesService {
   constructor(
+    @InjectRepository(Queue)
     private readonly queueRepository: Repository<Queue>,
+
+    @InjectRepository(QueueMember)
     private readonly queueMemberRepository: Repository<QueueMember>,
   ) {}
 
@@ -53,9 +57,6 @@ export class QueuesService {
     await this.queueRepository.remove(queue)
   }
 
-  /**
-   * Adiciona um membro à fila
-   */
   async addMember(queueId: number, extensionId: number, tenantId: number, penalty = 0): Promise<QueueMember> {
     const member = this.queueMemberRepository.create({
       queueId,
@@ -68,9 +69,6 @@ export class QueuesService {
     return this.queueMemberRepository.save(member)
   }
 
-  /**
-   * Remove um membro da fila
-   */
   async removeMember(memberId: number, tenantId: number): Promise<void> {
     const member = await this.queueMemberRepository.findOne({
       where: { id: memberId, tenantId },
