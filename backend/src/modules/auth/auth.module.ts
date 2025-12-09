@@ -1,3 +1,4 @@
+// backend/src/modules/auth/auth.module.ts
 import { Module } from "@nestjs/common"
 import { JwtModule } from "@nestjs/jwt"
 import { PassportModule } from "@nestjs/passport"
@@ -13,30 +14,22 @@ import { SystemUser } from "../users/entities/system-user.entity"
 @Module({
   imports: [
     ConfigModule,
-
     TypeOrmModule.forFeature([SystemUser]),
-
-    // O defaultStrategy DEVE SER jwt (NÃO local)
+    // IMPORTANTE: defaultStrategy = "jwt"
     PassportModule.register({ defaultStrategy: "jwt" }),
-
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get("JWT_SECRET"),
-        signOptions: { expiresIn: configService.get("JWT_EXPIRES_IN", "24h") },
+        signOptions: {
+          expiresIn: configService.get("JWT_EXPIRES_IN", "24h"),
+        },
       }),
       inject: [ConfigService],
     }),
   ],
-
   controllers: [AuthController],
-
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-  ],
-
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
