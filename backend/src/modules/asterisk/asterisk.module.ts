@@ -5,7 +5,7 @@ import { AsteriskRealtimeService } from "./asterisk-realtime.service"
 
 @Module({
   imports: [
-    ConfigModule, // Apenas importa, NÃO coloca ConfigService nos providers
+    ConfigModule, // garante que ConfigService está disponível para injeção
   ],
   providers: [
     AsteriskService,
