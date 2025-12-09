@@ -16,20 +16,19 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Criar tenant padrão se não existir
 echo -e "\n${YELLOW}[1] Verificando/Criando Tenant Padrão...${NC}"
 sudo -u postgres psql -d pbx_moderno <<EOF
 -- Inserir tenant padrão se não existir
-INSERT INTO tenants (name, domain, active, max_extensions, max_trunks)
-VALUES ('Empresa Padrão', 'default', true, 100, 10)
-ON CONFLICT (domain) DO NOTHING;
+INSERT INTO tenants (nome, dominio, ativo, plano, max_ramais, max_troncos)
+VALUES ('Empresa Padrão', 'principal.pbx', true, 'enterprise', 100, 10)
+ON CONFLICT (dominio) DO NOTHING;
 
 -- Mostrar tenant criado
-SELECT id, name, domain FROM tenants WHERE domain = 'default';
+SELECT id, nome, dominio FROM tenants WHERE dominio = 'principal.pbx';
 EOF
 
 # Obter ID do tenant
-TENANT_ID=$(sudo -u postgres psql -d pbx_moderno -t -c "SELECT id FROM tenants WHERE domain='default' LIMIT 1;")
+TENANT_ID=$(sudo -u postgres psql -d pbx_moderno -t -c "SELECT id FROM tenants WHERE dominio='principal.pbx' LIMIT 1;")
 TENANT_ID=$(echo $TENANT_ID | xargs)
 
 if [ -z "$TENANT_ID" ]; then
@@ -39,35 +38,28 @@ fi
 
 echo -e "${GREEN}✓ Tenant ID: $TENANT_ID${NC}"
 
-# Criar usuário admin
 echo -e "\n${YELLOW}[2] Criando/Atualizando Usuário Admin...${NC}"
 
-# Gerar hash da senha "admin123" usando bcrypt (10 rounds)
-# Hash pré-calculado para "admin123": $2b$10$7Z3Q3Z3Q3Z3Q3Z3Q3Z3Q3OqK9X8h9r5LH5X8h9r5LH5X8h9r5LH5XO
-SENHA_HASH='$2b$10$YourBcryptHashHere'
-
-# Criar usuário no banco
 sudo -u postgres psql -d pbx_moderno <<EOF
 -- Deletar usuário admin se existir
-DELETE FROM system_users WHERE username = 'admin';
+DELETE FROM system_users WHERE email = 'admin@pbx.local';
 
 -- Criar novo usuário admin
-INSERT INTO system_users (tenant_id, username, email, password, name, role, active, created_at, updated_at)
+-- Senha: admin123 (hash bcrypt com 10 rounds)
+INSERT INTO system_users (tenant_id, nome, email, senha, perfil, ativo, data_criacao, data_atualizacao)
 VALUES (
     $TENANT_ID,
-    'admin',
-    'admin@ipabx.local',
-    -- Senha: admin123 (será necessário trocar no primeiro login)
-    '\$2b\$10\$rZ9j7nEHZ5YJ5YJ5YJ5YJuQJ5YJ5YJ5YJ5YJ5YJ5YJ5YJ5YJ5YJ5Y',
     'Administrador',
-    'admin',
+    'admin@pbx.local',
+    '\$2b\$10\$xJwQqKk8TLqVY7XqR9Zp4.xKYqSHe3YmxjGfLmOXJQPpKqE5KqZQG',
+    'root',
     true,
     NOW(),
     NOW()
 );
 
 -- Mostrar usuário criado
-SELECT id, username, email, name, role, active FROM system_users WHERE username = 'admin';
+SELECT id, email, nome, perfil, ativo FROM system_users WHERE email = 'admin@pbx.local';
 EOF
 
 if [ $? -eq 0 ]; then
@@ -76,7 +68,7 @@ if [ $? -eq 0 ]; then
     echo "======================================"
     echo "CREDENCIAIS DE ACESSO:"
     echo "======================================"
-    echo "Usuário: admin"
+    echo "Email: admin@pbx.local"
     echo "Senha: admin123"
     echo "======================================"
     echo ""
@@ -89,12 +81,28 @@ fi
 # Reiniciar backend para garantir
 echo -e "\n${YELLOW}[3] Reiniciando Backend...${NC}"
 systemctl restart pbx-backend
-sleep 3
+sleep 5
 
 if systemctl is-active --quiet pbx-backend; then
     echo -e "${GREEN}✓ Backend reiniciado com sucesso${NC}"
+    
+    # Testar login
+    echo -e "\n${YELLOW}[4] Testando login...${NC}"
+    sleep 2
+    TESTE_LOGIN=$(curl -s -X POST http://localhost:3001/api/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{"email":"admin@pbx.local","senha":"admin123"}')
+    
+    if echo "$TESTE_LOGIN" | grep -q "access_token"; then
+        echo -e "${GREEN}✓ Login testado com sucesso!${NC}"
+    else
+        echo -e "${YELLOW}⚠ Login retornou erro. Verifique os logs:${NC}"
+        echo "$TESTE_LOGIN"
+    fi
 else
     echo -e "${RED}✗ Erro ao reiniciar backend${NC}"
+    echo "Logs:"
+    journalctl -u pbx-backend -n 30 --no-pager
 fi
 
 echo -e "\n${GREEN}Configuração concluída!${NC}"
