@@ -12,19 +12,18 @@ import { SystemUser } from "../users/entities/system-user.entity"
 
 @Module({
   imports: [
-    ConfigModule, // <-- ESSENCIAL! AGORA DISPONIBILIZA ConfigService
+    ConfigModule,
 
     TypeOrmModule.forFeature([SystemUser]),
 
-    PassportModule.register({ defaultStrategy: "local" }),
+    // O defaultStrategy DEVE SER jwt (NÃO local)
+    PassportModule.register({ defaultStrategy: "jwt" }),
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get("JWT_SECRET"),
-        signOptions: {
-          expiresIn: configService.get("JWT_EXPIRES_IN", "24h"),
-        },
+        signOptions: { expiresIn: configService.get("JWT_EXPIRES_IN", "24h") },
       }),
       inject: [ConfigService],
     }),
@@ -34,7 +33,7 @@ import { SystemUser } from "../users/entities/system-user.entity"
 
   providers: [
     AuthService,
-    LocalStrategy, // ordem não importa, mas precisa vir ANTES do export
+    LocalStrategy,
     JwtStrategy,
   ],
 
