@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException, ConflictException } from "@nestjs/common"
-import type { Repository } from "typeorm"
-import * as bcrypt from "bcrypt"
-import type { SystemUser } from "./entities/system-user.entity"
-import type { CreateUserDto } from "./dto/create-user.dto"
-import type { UpdateUserDto } from "./dto/update-user.dto"
+import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcrypt";
+import { SystemUser } from "./entities/system-user.entity";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: Repository<SystemUser>) {}
+  constructor(
+    @InjectRepository(SystemUser)
+    private readonly userRepository: Repository<SystemUser>,
+  ) {}
 
   /**
    * Cria um novo usuário
@@ -16,22 +20,22 @@ export class UsersService {
     // Verifica se email já existe
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
-    })
+    });
 
     if (existingUser) {
-      throw new ConflictException("Email já cadastrado")
+      throw new ConflictException("Email já cadastrado");
     }
 
     // Hash da senha
-    const senhaHash = await bcrypt.hash(createUserDto.senha, 10)
+    const senhaHash = await bcrypt.hash(createUserDto.senha, 10);
 
     const user = this.userRepository.create({
       ...createUserDto,
       senha: senhaHash,
       tenantId,
-    })
+    });
 
-    return this.userRepository.save(user)
+    return this.userRepository.save(user);
   }
 
   /**
@@ -42,7 +46,7 @@ export class UsersService {
       where: { tenantId },
       relations: ["tenant"],
       order: { nome: "ASC" },
-    })
+    });
   }
 
   /**
@@ -52,35 +56,35 @@ export class UsersService {
     const user = await this.userRepository.findOne({
       where: { id, tenantId },
       relations: ["tenant"],
-    })
+    });
 
     if (!user) {
-      throw new NotFoundException("Usuário não encontrado")
+      throw new NotFoundException("Usuário não encontrado");
     }
 
-    return user
+    return user;
   }
 
   /**
    * Atualiza um usuário
    */
   async update(id: number, updateUserDto: UpdateUserDto, tenantId: number): Promise<SystemUser> {
-    const user = await this.findOne(id, tenantId)
+    const user = await this.findOne(id, tenantId);
 
     // Se está alterando a senha
     if (updateUserDto.senha) {
-      updateUserDto.senha = await bcrypt.hash(updateUserDto.senha, 10)
+      updateUserDto.senha = await bcrypt.hash(updateUserDto.senha, 10);
     }
 
-    Object.assign(user, updateUserDto)
-    return this.userRepository.save(user)
+    Object.assign(user, updateUserDto);
+    return this.userRepository.save(user);
   }
 
   /**
    * Remove um usuário
    */
   async remove(id: number, tenantId: number): Promise<void> {
-    const user = await this.findOne(id, tenantId)
-    await this.userRepository.remove(user)
+    const user = await this.findOne(id, tenantId);
+    await this.userRepository.remove(user);
   }
 }
