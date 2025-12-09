@@ -6,11 +6,9 @@ import type { UpdateTenantDto } from "./dto/update-tenant.dto"
 
 @Injectable()
 export class TenantsService {
-  private readonly tenantRepository: Repository<Tenant>
-
-  constructor(tenantRepository: Repository<Tenant>) {
-    this.tenantRepository = tenantRepository
-  }
+  constructor(
+    private readonly tenantRepository: Repository<Tenant>, // Removing the decorator from here
+  ) {}
 
   /**
    * Cria um novo tenant
