@@ -12,8 +12,11 @@ import { SystemUser } from "../users/entities/system-user.entity"
 
 @Module({
   imports: [
+    ConfigModule,  // ✅ IMPORTANTE — garante ConfigService disponível
+
     TypeOrmModule.forFeature([SystemUser]),
     PassportModule.register({ defaultStrategy: "jwt" }),
+
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
