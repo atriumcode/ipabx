@@ -12,10 +12,12 @@ import { SystemUser } from "../users/entities/system-user.entity"
 
 @Module({
   imports: [
-    ConfigModule,  // ✅ IMPORTANTE — garante ConfigService disponível
+    ConfigModule, // obrigatório
 
     TypeOrmModule.forFeature([SystemUser]),
-    PassportModule.register({ defaultStrategy: "jwt" }),
+
+    // NÃO registar defaultStrategy aqui!
+    PassportModule,
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -28,8 +30,12 @@ import { SystemUser } from "../users/entities/system-user.entity"
       inject: [ConfigService],
     }),
   ],
+
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy],
+
+  // IMPORTANTE: LocalStrategy vem ANTES da JwtStrategy
+  providers: [AuthService, LocalStrategy, JwtStrategy],
+
   exports: [AuthService],
 })
 export class AuthModule {}
