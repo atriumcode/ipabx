@@ -1,15 +1,20 @@
 import { Module } from "@nestjs/common"
-import { ConfigModule } from "@nestjs/config"
+import { ConfigModule, ConfigService } from "@nestjs/config"
 import { AsteriskService } from "./asterisk.service"
 import { AsteriskRealtimeService } from "./asterisk-realtime.service"
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule, // usa ConfigModule já carregado no AppModule
   ],
-  providers: [AsteriskService, AsteriskRealtimeService],
-  exports: [AsteriskService, AsteriskRealtimeService],
+  providers: [
+    AsteriskService,
+    AsteriskRealtimeService,
+    ConfigService, // garante injeção
+  ],
+  exports: [
+    AsteriskService,
+    AsteriskRealtimeService,
+  ],
 })
 export class AsteriskModule {}
