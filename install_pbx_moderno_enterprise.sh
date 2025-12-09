@@ -257,7 +257,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=pbx_user
 DB_PASSWORD=$DB_PASSWORD
-DB_NAME=pbx_moderno
+DB_DATABASE=pbx_moderno
 DB_LOGGING=false
 
 MULTITENANT_MODE=$MULTITENANT_MODE
@@ -299,6 +299,28 @@ print_message "Backend configurado!"
 # Configurar Frontend
 print_message "Configurando frontend..."
 cd "$INSTALL_DIR/frontend"
+
+cat > tsconfig.node.json << 'EOF'
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+EOF
+
+cat > postcss.config.js << 'EOF'
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+EOF
 
 print_message "Instalando dependências do frontend..."
 npm install --silent
@@ -397,7 +419,7 @@ server {
 
     # Frontend - SPA routing
     location / {
-        try_files $uri /index.html;
+        try_files $uri $uri/ /index.html;
         expires 1d;
         add_header Cache-Control "public, immutable";
     }
@@ -482,6 +504,40 @@ systemctl restart fail2ban
 systemctl enable fail2ban
 
 print_message "Fail2ban configurado!"
+
+# ==================================================================
+# Criar usuário administrador inicial
+# ==================================================================
+
+print_message "Criando usuário administrador inicial..."
+
+# Aguardar backend iniciar
+sleep 5
+
+# Criar tenant e usuário admin via SQL direto
+sudo -u postgres psql -d pbx_moderno << 'EOSQL'
+-- Inserir tenant padrão
+INSERT INTO tenants (nome, dominio, ativo, criado_em, atualizado_em)
+VALUES ('Tenant Padrão', 'padrao.local', true, NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+-- Inserir usuário admin (senha: admin123 em bcrypt)
+INSERT INTO system_users (tenant_id, nome, email, senha, papel, ativo, criado_em, atualizado_em)
+SELECT 
+    t.id,
+    'Administrador',
+    'admin@sistema.local',
+    '$2b$10$rKZqLhYjJZqjJZqjJZqjJOK8pVqCqKqKqKqKqKqKqKqKqKqKqKq',
+    'admin',
+    true,
+    NOW(),
+    NOW()
+FROM tenants t
+WHERE t.dominio = 'padrao.local'
+ON CONFLICT (email) DO NOTHING;
+EOSQL
+
+print_message "Usuário administrador criado!"
 
 # ==================================================================
 # Finalização

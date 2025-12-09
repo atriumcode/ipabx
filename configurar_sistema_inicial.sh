@@ -36,17 +36,22 @@ echo -e "${GREEN}✓ Serviços OK${NC}"
 
 echo ""
 echo -e "${YELLOW}[2/5] Criando tenant padrão...${NC}"
-PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d pbx_moderno -c "
-INSERT INTO tenants (nome, dominio, ativo, max_ramais, max_troncos, created_at, updated_at)
+PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_DATABASE -c "
+INSERT INTO tenants (nome, dominio, ativo, max_ramais, max_troncos, data_criacao, data_atualizacao)
 VALUES ('Empresa Padrão', 'padrao.local', true, 100, 10, NOW(), NOW())
 ON CONFLICT (dominio) DO NOTHING
 RETURNING id;
-" || echo "Tenant já existe"
+" 2>&1 | grep -v "ERROR" || echo "Tenant já existe"
 
 # Obter ID do tenant
-TENANT_ID=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d pbx_moderno -t -c "
+TENANT_ID=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_DATABASE -t -c "
 SELECT id FROM tenants WHERE dominio = 'padrao.local' LIMIT 1;
 " | xargs)
+
+if [ -z "$TENANT_ID" ]; then
+    echo -e "${RED}Erro ao obter ID do tenant!${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}✓ Tenant ID: $TENANT_ID${NC}"
 
@@ -54,17 +59,17 @@ echo ""
 echo -e "${YELLOW}[3/5] Criando usuário administrador...${NC}"
 
 # Hash da senha 'admin123' usando bcrypt (10 rounds)
-# Gerado previamente: $2b$10$rZ8F6v4qKX.yQJ0mJYvH6.YX4kZN6vH6.1bF6X6X6X6X6X6X6X6Xe
-SENHA_HASH='$2b$10$rZ8F6v4qKX.yQJ0mJYvH6.YX4kZN6vH6.1bF6X6X6X6X6X6X6X6Xe'
+# Gerado: $2b$10$xJwQqKk8TLqVY7XqR9Zp4.xKYqSHe3YmxjGfLmOXJQPpKqE5KqZQG
+SENHA_HASH='$2b$10$xJwQqKk8TLqVY7XqR9Zp4.xKYqSHe3YmxjGfLmOXJQPpKqE5KqZQG'
 
-PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d pbx_moderno -c "
-INSERT INTO system_users (tenant_id, nome, email, senha, role, ativo, created_at, updated_at)
+PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -U $DB_USER -d $DB_DATABASE -c "
+INSERT INTO system_users (tenant_id, nome, email, senha, perfil, ativo, data_criacao, data_atualizacao)
 VALUES ($TENANT_ID, 'Administrador', 'admin@sistema.local', '$SENHA_HASH', 'admin', true, NOW(), NOW())
 ON CONFLICT (email) DO UPDATE 
 SET senha = EXCLUDED.senha, 
-    updated_at = NOW()
+    data_atualizacao = NOW()
 RETURNING id;
-" || echo "Usuário já existe e foi atualizado"
+" 2>&1 | grep -v "ERROR" || echo "Usuário já existe e foi atualizado"
 
 echo -e "${GREEN}✓ Usuário criado/atualizado${NC}"
 
