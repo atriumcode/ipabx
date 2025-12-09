@@ -16,7 +16,7 @@ import { SystemUser } from "../users/entities/system-user.entity"
 
     TypeOrmModule.forFeature([SystemUser]),
 
-    PassportModule.register({ defaultStrategy: "jwt" }),
+    PassportModule,
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
