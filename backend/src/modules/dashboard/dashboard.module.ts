@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
-import { DashboardService } from "./dashboard.service";
+
 import { DashboardController } from "./dashboard.controller";
+import { DashboardService } from "./dashboard.service";
 
 import { ExtensionsModule } from "../extensions/extensions.module";
 import { TrunksModule } from "../trunks/trunks.module";
@@ -12,7 +13,7 @@ import { CdrModule } from "../cdr/cdr.module";
     ExtensionsModule,
     TrunksModule,
     QueuesModule,
-    CdrModule, // <-- ESSENCIAL!
+    CdrModule,   // <-- ESSENCIAL! OBRIGATÓRIO!
   ],
   controllers: [DashboardController],
   providers: [DashboardService],
