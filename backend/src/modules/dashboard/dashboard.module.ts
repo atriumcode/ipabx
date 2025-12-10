@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { DashboardService } from "./dashboard.service";
 import { DashboardController } from "./dashboard.controller";
+
 import { ExtensionsModule } from "../extensions/extensions.module";
 import { TrunksModule } from "../trunks/trunks.module";
 import { QueuesModule } from "../queues/queues.module";
