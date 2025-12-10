@@ -8,6 +8,6 @@ import { Cdr } from "./entities/cdr.entity"
   imports: [TypeOrmModule.forFeature([Cdr])],
   controllers: [CdrController],
   providers: [CdrService],
-  exports: [CdrService],   // <-- AQUI ESTÁ O QUE FALTAVA!
+  exports: [CdrService], // <-- ESSENCIAL: disponibiliza CdrService para outros módulos
 })
 export class CdrModule {}
